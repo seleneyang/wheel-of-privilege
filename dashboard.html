@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Wheel of Privilege</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0e0e; --surface: #161616; --surface2: #1c1c1c;
+  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+  --text: #f0ede6; --muted: #6b6860;
+  --center: #c9a84c; --middle: #7a9e8a; --outer: #c05a5a; --r: 8px;
+}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; display: flex; flex-direction: column; }
+
+header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; }
+header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; letter-spacing: -0.02em; }
+header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+
+.top-bar { padding: 0.7rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; flex-wrap: wrap; }
+.top-left { display: flex; align-items: center; gap: 1rem; }
+.status-wrap { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--muted); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.status-dot.live { background: var(--middle); box-shadow: 0 0 0 3px rgba(122,158,138,0.2); animation: livepulse 2s infinite; }
+@keyframes livepulse { 0%,100%{box-shadow:0 0 0 3px rgba(122,158,138,0.2)} 50%{box-shadow:0 0 0 6px rgba(122,158,138,0.05)} }
+
+.participant-count { font-size: 0.72rem; color: var(--muted); }
+.participant-count strong { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--text); font-weight: 400; vertical-align: middle; margin-right: 3px; }
+
+.view-toggle { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.vt-btn { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; padding: 0.35rem 0.7rem; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
+.vt-btn:hover { color: var(--text); }
+.vt-btn.active { background: rgba(255,255,255,0.07); color: var(--text); }
+
+.clear-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; padding: 0.35rem 0.8rem; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
+.clear-btn:hover { border-color: var(--outer); color: var(--outer); }
+
+/* empty state */
+.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; padding: 3rem; }
+.empty-state .big { font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--muted); opacity: 0.3; }
+.empty-state p { font-size: 0.8rem; color: var(--muted); text-align: center; max-width: 300px; line-height: 1.7; }
+
+/* grid view */
+.grid-view { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; align-content: start; }
+.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; animation: fadein 0.3s ease; }
+@keyframes fadein { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+.card-header { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.card-num { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.card-progress { font-size: 0.62rem; color: var(--muted); }
+.card-stats { display: flex; gap: 0.35rem; width: 100%; }
+.cs { flex:1; text-align:center; border:1px solid var(--border); border-radius:4px; padding:0.25rem 0.2rem; }
+.cs-n { display:block; font-family:'DM Serif Display',serif; font-size:0.95rem; }
+.cs-l { font-size:0.55rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); }
+.cs0 .cs-n { color:var(--center); } .cs1 .cs-n { color:var(--middle); } .cs2 .cs-n { color:var(--outer); }
+
+/* overlay view */
+.overlay-view { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem 2rem; overflow: hidden; }
+.overlay-box { width: 100%; max-width: 560px; }
+.overlay-legend { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; margin-top: 1rem; }
+.ol-item { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: var(--muted); }
+.ol-swatch { width: 20px; height: 3px; border-radius: 2px; }
+
+/* aggregate view */
+.agg-view { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; }
+.agg-title { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+.agg-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+.agg-row { display: grid; grid-template-columns: 120px 1fr 1fr 1fr; gap: 0.5rem; align-items: center; }
+.agg-label { font-size: 0.72rem; color: var(--muted); text-align: right; padding-right: 0.5rem; }
+.agg-bar-wrap { height: 20px; background: var(--surface); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+.agg-bar { height: 100%; border-radius: 3px; transition: width 0.4s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; font-size: 0.6rem; min-width: 0; }
+.agg-bar span { color: rgba(0,0,0,0.6); font-weight: 500; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Facilitator Dashboard</h1>
+    <p>Wheel of Privilege — live view</p>
+  </div>
+  <div style="display:flex;gap:1rem;align-items:center">
+    <div style="display:flex;gap:0.8rem">
+      <div style="display:flex;align-items:center;gap:4px;font-size:0.7rem;color:var(--muted)"><span style="width:7px;height:7px;border-radius:50%;background:var(--center);display:inline-block"></span>Privileged</div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:0.7rem;color:var(--muted)"><span style="width:7px;height:7px;border-radius:50%;background:var(--middle);display:inline-block"></span>Middle</div>
+      <div style="display:flex;align-items:center;gap:4px;font-size:0.7rem;color:var(--muted)"><span style="width:7px;height:7px;border-radius:50%;background:var(--outer);display:inline-block"></span>Marginalized</div>
+    </div>
+  </div>
+</header>
+
+<div class="top-bar">
+  <div class="top-left">
+    <div class="status-wrap">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Connecting...</span>
+    </div>
+    <div class="participant-count"><strong id="pCount">0</strong> participants</div>
+  </div>
+  <div style="display:flex;gap:0.6rem;align-items:center">
+    <div class="view-toggle">
+      <button class="vt-btn active" data-view="grid" onclick="setView('grid',this)">Grid</button>
+      <button class="vt-btn" data-view="overlay" onclick="setView('overlay',this)">Overlay</button>
+      <button class="vt-btn" data-view="aggregate" onclick="setView('aggregate',this)">Aggregate</button>
+    </div>
+    <button class="clear-btn" onclick="clearAll()">Clear all</button>
+  </div>
+</div>
+
+<div id="mainContent" style="display:contents"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA--LXRXPEEbXO1RkrndfnGkeE0YPxUGYs",
+  authDomain: "wheel-of-privilege.firebaseapp.com",
+  databaseURL: "https://wheel-of-privilege-default-rtdb.firebaseio.com",
+  projectId: "wheel-of-privilege",
+  storageBucket: "wheel-of-privilege.firebasestorage.app",
+  messagingSenderId: "656587220251",
+  appId: "1:656587220251:web:bcda7be942594e41cb1fbe"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const DIMS = [
+  { key:'gender',   label:'Gender',           opts:['Cisgender man','Cisgender woman','Trans / nonbinary'] },
+  { key:'citizen',  label:'Citizenship',      opts:['Citizen','Documented','Undocumented'] },
+  { key:'skin',     label:'Skin colour',      opts:['White','Lighter shades','Dark'] },
+  { key:'edu',      label:'Formal education', opts:['Higher education','Post-16 education','Left before 16'] },
+  { key:'ability',  label:'Ability',          opts:['Able-bodied','Some disability','Significant disability'] },
+  { key:'sex',      label:'Sexuality',        opts:['Heterosexual','Gay man','Lesbian / bi / pan / asex'] },
+  { key:'neuro',    label:'Neurodiversity',   opts:['Neurotypical','Neuroatypical','Significant neurodivergence'] },
+  { key:'mental',   label:'Mental health',    opts:['Robust','Mostly stable','Vulnerable'] },
+  { key:'body',     label:'Body size',        opts:['Slim','Average','Large'] },
+  { key:'housing',  label:'Housing',          opts:['Property owner','Sheltered / renting','Homeless'] },
+  { key:'wealth',   label:'Wealth',           opts:['Comfortable','Struggling','Poverty'] },
+  { key:'language', label:'Language',         opts:['Majority language','Learned language','Monolingual minority'] },
+];
+
+const PALETTE = [
+  { border:'rgba(201,168,76,0.85)',  bg:'rgba(201,168,76,0.10)',  hex:'#c9a84c' },
+  { border:'rgba(122,158,138,0.85)', bg:'rgba(122,158,138,0.10)', hex:'#7a9e8a' },
+  { border:'rgba(192,90,90,0.85)',   bg:'rgba(192,90,90,0.10)',   hex:'#c05a5a' },
+  { border:'rgba(130,140,200,0.85)', bg:'rgba(130,140,200,0.10)', hex:'#828cc8' },
+  { border:'rgba(190,130,80,0.85)',  bg:'rgba(190,130,80,0.10)',  hex:'#be8250' },
+  { border:'rgba(160,100,170,0.85)', bg:'rgba(160,100,170,0.10)', hex:'#a064aa' },
+  { border:'rgba(80,160,200,0.85)',  bg:'rgba(80,160,200,0.10)',  hex:'#50a0c8' },
+  { border:'rgba(170,160,80,0.85)',  bg:'rgba(170,160,80,0.10)',  hex:'#aaa050' },
+];
+
+const RING_COLORS = ['#c9a84c','#7a9e8a','#c05a5a'];
+const RING_LABELS = ['Privileged','Middle','Marginalized'];
+
+let profiles = {}; // { sessionId: { answers:{}, updatedAt } }
+let currentView = 'grid';
+let overlayChart = null;
+let cardCharts = {};
+
+const profilesRef = ref(db, 'profiles');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+onValue(profilesRef, (snap) => {
+  statusDot.className = 'status-dot live';
+  statusText.textContent = 'Live';
+  const data = snap.val() || {};
+  profiles = data;
+  document.getElementById('pCount').textContent = Object.keys(profiles).length;
+  renderCurrentView();
+});
+
+window.setView = function(view, btn) {
+  currentView = view;
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.toggle('active', b === btn));
+  renderCurrentView();
+};
+
+window.clearAll = function() {
+  if (confirm('Clear all participant data?')) {
+    remove(ref(db, 'profiles'));
+  }
+};
+
+function renderCurrentView() {
+  // destroy old charts
+  Object.values(cardCharts).forEach(c => c.destroy());
+  cardCharts = {};
+  if (overlayChart) { overlayChart.destroy(); overlayChart = null; }
+
+  const content = document.getElementById('mainContent');
+  content.innerHTML = '';
+
+  const ids = Object.keys(profiles);
+  if (ids.length === 0) {
+    content.innerHTML = `<div class="empty-state"><div class="big">0</div><p>Waiting for participants to connect and fill their profiles. Share the page URL with them to get started.</p></div>`;
+    return;
+  }
+
+  if (currentView === 'grid') renderGrid(content, ids);
+  else if (currentView === 'overlay') renderOverlay(content, ids);
+  else renderAggregate(content, ids);
+}
+
+function statsFor(answers) {
+  let c = [0,0,0];
+  DIMS.forEach(d => { if (answers[d.key]!==undefined) c[answers[d.key]]++; });
+  return c;
+}
+
+function radarDataFor(answers, palIdx) {
+  const data = DIMS.map(d => answers[d.key]!==undefined ? 3 - answers[d.key] : null);
+  const ptColors = DIMS.map(d => answers[d.key]!==undefined ? RING_COLORS[answers[d.key]] : 'rgba(255,255,255,0.1)');
+  return {
+    labels: DIMS.map(d => d.label),
+    datasets: [{
+      data,
+      backgroundColor: PALETTE[palIdx % PALETTE.length].bg,
+      borderColor: PALETTE[palIdx % PALETTE.length].border,
+      borderWidth: 1.5,
+      pointBackgroundColor: ptColors,
+      pointBorderColor: 'transparent',
+      pointRadius: 3,
+      fill: true,
+    }]
+  };
+}
+
+const baseOpts = {
+  responsive: true, maintainAspectRatio: true, animation: { duration: 300 },
+  scales: { r: { min:0,max:3,ticks:{display:false},grid:{color:'rgba(255,255,255,0.07)'},angleLines:{color:'rgba(255,255,255,0.07)'},pointLabels:{color:'#6b6860',font:{family:'DM Sans',size:9,weight:'300'},padding:4} } },
+  plugins: { legend:{display:false}, tooltip:{
+    callbacks:{ label:(ctx)=>{ const v=ctx.raw; if(v===null) return 'Not answered'; return DIMS[ctx.dataIndex].opts[3-v]||''; } },
+    backgroundColor:'#1c1c1c',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+    titleColor:'#c9a84c',bodyColor:'#f0ede6',padding:10,
+    titleFont:{family:'DM Sans',size:11},bodyFont:{family:'DM Sans',size:11},
+  }}
+};
+
+function renderGrid(content, ids) {
+  const grid = document.createElement('div');
+  grid.className = 'grid-view';
+
+  ids.forEach((id, i) => {
+    const prof = profiles[id];
+    const answers = prof.answers || {};
+    const answered = Object.keys(answers).length;
+    const stats = statsFor(answers);
+    const pi = i % PALETTE.length;
+
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-num" style="color:${PALETTE[pi].hex}">Profile ${i+1}</span>
+        <span class="card-progress">${answered}/${DIMS.length} answered</span>
+      </div>`;
+
+    const canvas = document.createElement('canvas');
+    card.appendChild(canvas);
+
+    const statsEl = document.createElement('div');
+    statsEl.className = 'card-stats';
+    RING_LABELS.forEach((l,ri) => {
+      statsEl.innerHTML += `<div class="cs cs${ri}"><span class="cs-n">${stats[ri]}</span><span class="cs-l">${l}</span></div>`;
+    });
+    card.appendChild(statsEl);
+    grid.appendChild(card);
+
+    setTimeout(() => {
+      cardCharts[id] = new Chart(canvas, {
+        type:'radar', data: radarDataFor(answers, pi), options: baseOpts
+      });
+    }, 0);
+  });
+
+  content.appendChild(grid);
+}
+
+function renderOverlay(content, ids) {
+  const wrap = document.createElement('div');
+  wrap.className = 'overlay-view';
+
+  const box = document.createElement('div');
+  box.className = 'overlay-box';
+  const canvas = document.createElement('canvas');
+  box.appendChild(canvas);
+
+  const leg = document.createElement('div');
+  leg.className = 'overlay-legend';
+  ids.forEach((id, i) => {
+    const pi = i % PALETTE.length;
+    const answered = Object.keys((profiles[id].answers||{})).length;
+    leg.innerHTML += `<div class="ol-item"><span class="ol-swatch" style="background:${PALETTE[pi].hex}"></span>Profile ${i+1} (${answered}/${DIMS.length})</div>`;
+  });
+
+  wrap.appendChild(box);
+  wrap.appendChild(leg);
+  content.appendChild(wrap);
+
+  const datasets = ids.map((id, i) => {
+    const answers = profiles[id].answers || {};
+    const pi = i % PALETTE.length;
+    return {
+      label: `Profile ${i+1}`,
+      data: DIMS.map(d => answers[d.key]!==undefined ? 3-answers[d.key] : null),
+      backgroundColor: PALETTE[pi].bg,
+      borderColor: PALETTE[pi].border,
+      borderWidth: 1.5,
+      pointBackgroundColor: DIMS.map(d => answers[d.key]!==undefined ? RING_COLORS[answers[d.key]] : 'rgba(255,255,255,0.1)'),
+      pointBorderColor:'transparent',
+      pointRadius:3,
+      fill:true,
+    };
+  });
+
+  overlayChart = new Chart(canvas, {
+    type:'radar',
+    data:{ labels:DIMS.map(d=>d.label), datasets },
+    options:{
+      ...baseOpts,
+      scales:{ r:{ min:0,max:3,ticks:{display:false},grid:{color:'rgba(255,255,255,0.07)'},angleLines:{color:'rgba(255,255,255,0.07)'},pointLabels:{color:'#6b6860',font:{family:'DM Sans',size:10,weight:'300'},padding:6} } },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{ label:(ctx)=>{ const id=ids[ctx.datasetIndex]; const a=(profiles[id].answers||{}); const v=ctx.raw; if(v===null) return 'Not answered'; return DIMS[ctx.dataIndex].opts[3-v]||''; } },
+          backgroundColor:'#1c1c1c',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+          titleColor:'#c9a84c',bodyColor:'#f0ede6',padding:10,
+          titleFont:{family:'DM Sans',size:11},bodyFont:{family:'DM Sans',size:11},
+        }
+      }
+    }
+  });
+}
+
+function renderAggregate(content, ids) {
+  const wrap = document.createElement('div');
+  wrap.className = 'agg-view';
+
+  const title = document.createElement('div');
+  title.className = 'agg-title';
+  title.textContent = `Aggregate distribution across ${ids.length} participant${ids.length!==1?'s':''} — bar width = % of responses per ring`;
+  wrap.appendChild(title);
+
+  const grid = document.createElement('div');
+  grid.className = 'agg-grid';
+
+  DIMS.forEach(dim => {
+    const counts = [0,0,0];
+    let total = 0;
+    ids.forEach(id => {
+      const a = profiles[id].answers || {};
+      if (a[dim.key]!==undefined) { counts[a[dim.key]]++; total++; }
+    });
+
+    const row = document.createElement('div');
+    row.className = 'agg-row';
+    row.innerHTML = `<div class="agg-label">${dim.label}</div>`;
+
+    const barColors = ['var(--center)','var(--middle)','var(--outer)'];
+    counts.forEach((c, ri) => {
+      const pct = total > 0 ? Math.round((c/total)*100) : 0;
+      const bwrap = document.createElement('div');
+      bwrap.className = 'agg-bar-wrap';
+      bwrap.innerHTML = `<div class="agg-bar" style="width:${pct}%;background:${barColors[ri]};opacity:0.7">${pct>8?`<span>${pct}%</span>`:''}</div>`;
+      row.appendChild(bwrap);
+    });
+
+    grid.appendChild(row);
+  });
+
+  // column headers
+  const headerRow = document.createElement('div');
+  headerRow.className = 'agg-row';
+  headerRow.style.marginBottom = '0.3rem';
+  headerRow.innerHTML = `<div></div>`;
+  ['Privileged','Middle','Marginalized'].forEach((l,i) => {
+    headerRow.innerHTML += `<div style="font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:${['var(--center)','var(--middle)','var(--outer)'][i]}">${l}</div>`;
+  });
+
+  wrap.appendChild(headerRow);
+  wrap.appendChild(grid);
+  content.appendChild(wrap);
+}
+
+// init
+renderCurrentView();
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wheel of Privilege</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0e0e; --surface: #161616; --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14); --text: #f0ede6; --muted: #6b6860;
+  --center: #c9a84c; --middle: #7a9e8a; --outer: #c05a5a; --r: 8px;
+}
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; display: flex; flex-direction: column; }
+
+header { padding: 1.4rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; }
+header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; letter-spacing: -0.02em; }
+header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+.legend { display: flex; gap: 1rem; align-items: center; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: var(--muted); }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+.status-bar { padding: 0.6rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.6rem; font-size: 0.72rem; color: var(--muted); flex-shrink: 0; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
+.status-dot.connected { background: var(--middle); }
+.status-dot.saving { background: var(--center); animation: pulse 0.8s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.main { display: grid; grid-template-columns: 1fr 380px; flex: 1; overflow: hidden; min-height: 0; }
+
+.form-panel { overflow-y: auto; padding: 1.2rem 1.5rem 2rem; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem; }
+.anon-notice { font-size: 0.7rem; color: var(--muted); background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15); border-radius: 4px; padding: 0.5rem 0.7rem; margin-bottom: 0.4rem; }
+
+.dimension-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 0.75rem 0.9rem; transition: border-color 0.2s; }
+.dimension-block.answered { border-color: rgba(255,255,255,0.13); }
+.dimension-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+.options-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem; }
+.opt-btn { background: none; border: 1px solid var(--border); border-radius: 4px; color: rgba(240,237,230,0.5); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 300; padding: 0.38rem 0.25rem; cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.3; }
+.opt-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+.opt-btn.active-0 { background: rgba(201,168,76,0.18); border-color: var(--center); color: var(--center); font-weight: 500; }
+.opt-btn.active-1 { background: rgba(122,158,138,0.18); border-color: var(--middle); color: var(--middle); font-weight: 500; }
+.opt-btn.active-2 { background: rgba(192,90,90,0.18); border-color: var(--outer); color: var(--outer); font-weight: 500; }
+
+.viz-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; overflow: hidden; }
+.radar-box { width: 100%; max-width: 340px; }
+.stats-row { display: flex; gap: 0.5rem; width: 100%; max-width: 340px; margin-top: 1rem; }
+.stat-pill { flex: 1; padding: 0.55rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); text-align: center; }
+.stat-n { font-family: 'DM Serif Display', serif; font-size: 1.2rem; display: block; }
+.stat-l { font-size: 0.6rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.s0 .stat-n { color: var(--center); } .s1 .stat-n { color: var(--middle); } .s2 .stat-n { color: var(--outer); }
+.progress-hint { font-size: 0.68rem; color: var(--muted); margin-top: 0.6rem; letter-spacing: 0.04em; }
+.reset-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; padding: 0.35rem 0.8rem; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; margin-top: 0.7rem; }
+.reset-btn:hover { border-color: var(--outer); color: var(--outer); }
+
+@media (max-width: 700px) {
+  .main { grid-template-columns: 1fr; }
+  .viz-panel { border-top: 1px solid var(--border); padding: 1rem; }
+  .radar-box { max-width: 280px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Wheel of Privilege</h1>
+    <p>Intersectionality — anonymous self-positioning</p>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--center)"></span>Privileged</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--middle)"></span>Middle</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--outer)"></span>Marginalized</div>
+  </div>
+</header>
+
+<div class="status-bar">
+  <span class="status-dot" id="statusDot"></span>
+  <span id="statusText">Connecting...</span>
+</div>
+
+<div class="main">
+  <div class="form-panel" id="formPanel">
+    <div class="anon-notice">Anonymous mode — no names or identifying information are collected. Your responses appear live on the facilitator's screen.</div>
+  </div>
+  <div class="viz-panel">
+    <div class="radar-box"><canvas id="radarChart"></canvas></div>
+    <div class="stats-row">
+      <div class="stat-pill s0"><span class="stat-n" id="cnt0">0</span><span class="stat-l">Privileged</span></div>
+      <div class="stat-pill s1"><span class="stat-n" id="cnt1">0</span><span class="stat-l">Middle</span></div>
+      <div class="stat-pill s2"><span class="stat-n" id="cnt2">0</span><span class="stat-l">Marginalized</span></div>
+    </div>
+    <div class="progress-hint" id="progressHint">0 of 12 dimensions answered</div>
+    <button class="reset-btn" onclick="resetProfile()">Reset my answers</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA--LXRXPEEbXO1RkrndfnGkeE0YPxUGYs",
+  authDomain: "wheel-of-privilege.firebaseapp.com",
+  databaseURL: "https://wheel-of-privilege-default-rtdb.firebaseio.com",
+  projectId: "wheel-of-privilege",
+  storageBucket: "wheel-of-privilege.firebasestorage.app",
+  messagingSenderId: "656587220251",
+  appId: "1:656587220251:web:bcda7be942594e41cb1fbe"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const DIMS = [
+  { key:'gender',   label:'Gender',           opts:['Cisgender man','Cisgender woman','Trans / nonbinary'] },
+  { key:'citizen',  label:'Citizenship',      opts:['Citizen','Documented','Undocumented'] },
+  { key:'skin',     label:'Skin colour',      opts:['White','Lighter shades','Dark'] },
+  { key:'edu',      label:'Formal education', opts:['Higher education','Post-16 education','Left before 16'] },
+  { key:'ability',  label:'Ability',          opts:['Able-bodied','Some disability','Significant disability'] },
+  { key:'sex',      label:'Sexuality',        opts:['Heterosexual','Gay man','Lesbian / bi / pan / asex'] },
+  { key:'neuro',    label:'Neurodiversity',   opts:['Neurotypical','Neuroatypical','Significant neurodivergence'] },
+  { key:'mental',   label:'Mental health',    opts:['Robust','Mostly stable','Vulnerable'] },
+  { key:'body',     label:'Body size',        opts:['Slim','Average','Large'] },
+  { key:'housing',  label:'Housing',          opts:['Property owner','Sheltered / renting','Homeless'] },
+  { key:'wealth',   label:'Wealth',           opts:['Comfortable','Struggling','Poverty'] },
+  { key:'language', label:'Language',         opts:['Majority language','Learned language','Monolingual minority'] },
+];
+
+const RING_COLORS = ['#c9a84c','#7a9e8a','#c05a5a'];
+
+// generate anonymous session ID
+let sessionId = sessionStorage.getItem('wop-session');
+if (!sessionId) {
+  sessionId = 'p-' + Math.random().toString(36).slice(2, 9);
+  sessionStorage.setItem('wop-session', sessionId);
+}
+
+const profileRef = ref(db, `profiles/${sessionId}`);
+let localState = {};
+let saveTimeout = null;
+let chart = null;
+
+// status UI
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+function setStatus(state) {
+  statusDot.className = 'status-dot ' + state;
+  if (state === 'connected') statusText.textContent = 'Connected — your responses sync live';
+  if (state === 'saving')    statusText.textContent = 'Saving...';
+  if (state === '')          statusText.textContent = 'Connecting...';
+}
+
+// load existing session data
+onValue(profileRef, (snap) => {
+  setStatus('connected');
+  const data = snap.val();
+  if (data && data.answers) {
+    localState = data.answers;
+    renderForm();
+    updateViz();
+  }
+}, { onlyOnce: true });
+
+// build form
+function renderForm() {
+  const panel = document.getElementById('formPanel');
+  // keep notice
+  const notice = panel.querySelector('.anon-notice');
+  panel.innerHTML = '';
+  if (notice) panel.appendChild(notice);
+
+  DIMS.forEach(dim => {
+    const block = document.createElement('div');
+    block.className = 'dimension-block' + (localState[dim.key] !== undefined ? ' answered' : '');
+    block.innerHTML = `<div class="dimension-label">${dim.label}</div><div class="options-row"></div>`;
+    const row = block.querySelector('.options-row');
+    dim.opts.forEach((opt, ri) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn' + (localState[dim.key] === ri ? ` active-${ri}` : '');
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        localState[dim.key] = ri;
+        renderForm();
+        updateViz();
+        scheduleSave();
+      });
+      row.appendChild(btn);
+    });
+    panel.appendChild(block);
+  });
+}
+
+function scheduleSave() {
+  setStatus('saving');
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    set(profileRef, { answers: localState, updatedAt: Date.now() })
+      .then(() => setStatus('connected'))
+      .catch(() => setStatus(''));
+  }, 600);
+}
+
+window.resetProfile = function() {
+  localState = {};
+  remove(profileRef);
+  renderForm();
+  updateViz();
+  setStatus('connected');
+};
+
+// chart
+const ctx = document.getElementById('radarChart').getContext('2d');
+chart = new Chart(ctx, {
+  type: 'radar',
+  data: {
+    labels: DIMS.map(d => d.label),
+    datasets: [{
+      data: DIMS.map(() => null),
+      backgroundColor: 'rgba(201,168,76,0.10)',
+      borderColor: 'rgba(201,168,76,0.7)',
+      borderWidth: 1.5,
+      pointBackgroundColor: DIMS.map(() => 'rgba(255,255,255,0.1)'),
+      pointBorderColor: 'transparent',
+      pointRadius: 4,
+      fill: true,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: true, animation: { duration: 200 },
+    scales: { r: { min:0, max:3, ticks:{display:false}, grid:{color:'rgba(255,255,255,0.07)'}, angleLines:{color:'rgba(255,255,255,0.07)'}, pointLabels:{color:'#6b6860',font:{family:'DM Sans',size:10,weight:'300'},padding:6} } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: { label: (ctx) => { const v=ctx.raw; if(v===null) return 'Not answered'; return DIMS[ctx.dataIndex].opts[3-v]||''; } },
+        backgroundColor:'#1c1c1c', borderColor:'rgba(255,255,255,0.1)', borderWidth:1,
+        titleColor:'#c9a84c', bodyColor:'#f0ede6', padding:10,
+        titleFont:{family:'DM Sans',size:11}, bodyFont:{family:'DM Sans',size:11},
+      }
+    }
+  }
+});
+
+function updateViz() {
+  let c = [0,0,0];
+  const data = DIMS.map(d => {
+    if (localState[d.key] === undefined) return null;
+    c[localState[d.key]]++;
+    return 3 - localState[d.key];
+  });
+  const ptColors = DIMS.map(d => localState[d.key]!==undefined ? RING_COLORS[localState[d.key]] : 'rgba(255,255,255,0.1)');
+
+  chart.data.datasets[0].data = data;
+  chart.data.datasets[0].pointBackgroundColor = ptColors;
+  chart.update('none');
+
+  [0,1,2].forEach(i => document.getElementById(`cnt${i}`).textContent = c[i]);
+  const answered = Object.keys(localState).length;
+  document.getElementById('progressHint').textContent = `${answered} of ${DIMS.length} dimensions answered`;
+}
+
+setStatus('');
+renderForm();
+updateViz();
+</script>
+</body>
+</html>
