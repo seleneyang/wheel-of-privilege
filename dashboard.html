@@ -1,377 +1,3 @@
-
-1773847676165_image.png
-Quiero hacer otro tipo de visualización para estos datos, pero solo tengo la imagen, vos podrías convertirlo en una base de datos que yo pueda editar desde Flourish o desde Observable?
-
-9:28 AM
-
-Reading the skill file for xlsx
-Reading the skill file for xlsx
-Voy a transcribir todos los datos de la imagen y crear un CSV limpio listo para usar en Flourish u Observable.
-
-
-Se ejecutaron 2 comandos, archivo leído
-Se ejecutaron 2 comandos, archivo leído
-Te genere dos versiones:
-
-wheel_of_privilege_long.csv (formato largo, recomendado) — una fila por cada combinacion de dimension + anillo. Tiene estas columnas:
-
-dimension — la categoria (Gender, Wealth, Housing, etc.)
-ring — center / middle / outer
-label — la etiqueta exacta del diagrama
-ring_order — 1, 2, 3 (util para ordenar o mapear color)
-proximity_to_power — High / Medium / Low
-wheel_of_privilege.csv (formato ancho) — una fila por dimension, con las tres etiquetas en columnas separadas. Mas simple si queres hacer una tabla de referencia.
-
-Para Flourish: el formato largo funciona muy bien con los templates de Hierarchy, Scatter, o incluso un Sunburst si queres replicar la rueda. La columna ring_order te sirve como valor cuantitativo para mapear tamaños o colores.
-
-Para Observable: el formato largo es el mas versatil para hacer joins, filtros o construir una visualizacion radial con D3.
-
-Hay alguna visualizacion especifica que tenes en mente — tipo radar, sunburst, tabla interactiva? Puedo ayudarte a configurar el mapeo de columnas para el template que elijas.
-
-Wheel of privilege long
-Tabla · CSV 
-Wheel of privilege
-Tabla · CSV 
-Qué visualizaciones me recomendarías?
-
-9:32 AM
-Depende un poco de qué querés comunicar con los datos. Algunas preguntas para afinar la recomendación:
-
-Buena pregunta. Te puedo dar una respuesta más afinada si me decís un poco más del contexto, pero ya que vi los datos, te doy mis recomendaciones directas para cada escenario posible.
-
-Para el modelo completo (todas las dimensiones a la vez), las mejores opciones son:
-
-Sunburst chart — es la más fiel a la rueda original, pero en Flourish o D3 queda mucho más limpia e interactiva. Podés hacer clic en cada segmento para ver detalles. En Flourish existe el template "Hierarchy" que lo soporta directamente con tu CSV largo.
-
-Radar / spider chart — si querés mostrar perfiles, no la estructura. Cada dimensión es un eje, y podés superponer el perfil de una persona o grupo. Muy útil para talleres.
-
-Para que la gente se ubique a sí misma, lo más potente sería:
-
-Encuesta interactiva con visualización resultante — cada persona selecciona su posición en cada dimensión y se genera su perfil de privilegio como polígono en un radar chart. Eso lo puedo construir directamente como artefacto interactivo aquí si querés, sin necesidad de Flourish.
-
-Para comparar grupos o análisis más académico:
-
-Heatmap o matriz — dimensiones en filas, anillos (center/middle/outer) en columnas, con color representando algo como frecuencia o distancia al poder. Funciona muy bien en Observable con D3.
-
-Lollipop chart o dot plot — una fila por dimensión, con un punto indicando posición. Más legible que barras para este tipo de datos ordinales.
-
-¿Para qué contexto es y qué querés comunicar? Así te armo directamente la visualización o te doy el mapeo exacto de columnas para el template de Flourish.
-
-P: ¿Cuál es el objetivo principal de la visualización?
-R: Permitir que la gente se ubique a sí misma en la rueda
-
-P: ¿Para qué contexto es?
-R: Taller / facilitación en vivo
-
-9:33 AM
-Perfecto, entonces lo más útil es una herramienta interactiva donde cada participante selecciona su posición en cada dimensión y ve su perfil generado en tiempo real. Te lo armo directamente.
-
-
-Archivo visualizado, creó un archivo, archivo leído
-Archivo visualizado, creó un archivo, archivo leído
-La herramienta es un archivo HTML autónomo, sin dependencias externas, que podés abrir en cualquier navegador durante el taller.
-
-Lo que hace: a la izquierda aparecen las 12 dimensiones como bloques seleccionables, cada una con sus tres opciones (privilegiado/intermedio/marginalizadx). A la derecha se genera en tiempo real un radar chart con el perfil de la persona, con colores diferenciados por anillo y un contador de cuántas dimensiones cayeron en cada zona.
-
-Algunas cosas que podrías ajustar para el taller:
-
-Añadir un campo de nombre al inicio si querés proyectar perfiles individuales
-Modo anonimato donde solo se muestre el radar sin las selecciones visibles
-Comparación de dos perfiles superpuestos en el mismo radar
-Versión en inglés si el grupo lo requiere
-¿Querés que agregue alguna de esas funciones?
-
-Rueda privilegio
-Código · HTML 
-Podrías hacerlo en inglés por favor.... 
-Podrías darme una versión anónima
-Y después también que se puedan comparar dos perfiles o mas?
-
-9:46 AM
-Voy paso a paso. Primero la versión en inglés + anónima, luego agrego la comparación de perfiles múltiples.
-
-
-Creó un archivo, archivo leído
-Creó un archivo, archivo leído
-Todo en un solo archivo. Lo que tiene:
-
-Perfiles múltiples — el botón + en la barra de tabs agrega un perfil nuevo, cada uno con su propio color. Podés tener tantos como quieras y navegar entre ellos.
-
-Tres modos de visualización (aparecen cuando hay más de un perfil):
-
-Individual — ve el radar del perfil activo con sus estadísticas
-Overlay — todos los perfiles superpuestos en un solo radar para comparar directamente
-Grid — cada perfil en su propia tarjeta pequeña, lado a lado
-Modo anónimo — no hay campos de nombre ni datos identificatorios. El aviso está visible en el panel.
-
-Para un taller en vivo podés proyectar la pantalla y pedir que alguien del grupo haga sus selecciones, luego agregar un segundo perfil para contrastar, y usar el modo Overlay para la discusión grupal.
-
-Wheel of privilege
-Código · HTML 
-Cómo puedo integrarlos a la presentación que está en google slides?
-
-9:49 AM
-Hay algunas opciones, con distintos niveles de fricción:
-
-Buena pregunta para aclarar antes de recomendar. Mientras tanto te explico las tres opciones reales que existen, porque Google Slides tiene limitaciones importantes:
-
-Opción 1 — Cambiar de ventana (lo más simple y confiable) Tenés la presentación en una pestaña y el HTML en otra. Cuando llegás a esa parte del taller, minimizás Slides y abrís la herramienta. Sin fricción técnica, funciona siempre. La desventaja es que el cambio de contexto visual puede sentirse abrupto.
-
-Opción 2 — Incrustar via iframe en Slides Google Slides no soporta iframes nativos, pero podés subir el archivo HTML a GitHub Pages, Netlify o Google Sites y luego insertar el link como "Vínculo" en una diapositiva. Al hacer clic abre en el navegador. No se renderiza dentro del slide, pero el flujo es más suave.
-
-Opción 3 — Publicar en la web y que participantes accedan desde sus dispositivos Subís el HTML a GitHub Pages o Netlify (gratis, tarda 2 minutos), compartís el link por chat o QR en pantalla, y cada persona completa su perfil en su propio teléfono o laptop. Después vos mostrás comparaciones en la pantalla principal. Esta es la opción más poderosa para un taller participativo.
-
-Dependiendo de lo que respondiste, te puedo ayudar a publicarlo en GitHub Pages o Netlify ahora mismo, o preparar una diapositiva de transición con QR code incluido. ¿Cuál camino te interesa?
-
-P: ¿Cómo vas a presentar el taller?
-R: Quiero la opción tres
-
-P: ¿Qué nivel de integración buscás?
-R: Que los participantes accedan desde sus dispositivos
-
-9:50 AM
-Perfecto. La opción más rápida y gratuita es Netlify Drop — sin cuenta, sin comandos, arrastrás el archivo y en 30 segundos tenés una URL pública.
-
-Pasos:
-
-Descargá el archivo wheel_of_privilege.html que generamos
-Abrí netlify.com/drop en tu navegador
-Arrastrá el archivo directo a la página
-Netlify te da una URL tipo random-name-123.netlify.app — copiála
-Eso es todo. La herramienta queda pública y funciona en cualquier dispositivo.
-
-Para el taller, lo ideal es tener una diapositiva de transición en Slides con un QR code apuntando a esa URL. Te genero esa diapositiva ahora — pero necesito la URL que te da Netlify una vez que subas el archivo.
-
-¿Querés que mientras tanto te prepare la diapositiva con un placeholder para el QR, lista para insertar la URL cuando la tengas?
-
-Quisiera que me des los pasos para deploy it en una github page
-
-9:55 AM
-Claro. Asumiendo que ya tenés una cuenta en GitHub:
-
-1. Crear el repositorio
-
-Andá a github.com/new
-Nombre del repo: wheel-of-privilege (o el que quieras)
-Marcá "Public"
-Marcá "Add a README file"
-Click en "Create repository"
-2. Subir el archivo
-
-Dentro del repo, click en "Add file" → "Upload files"
-Arrastrá el archivo wheel_of_privilege.html
-Importante: renombralo a index.html antes de subirlo, o GitHub Pages no lo va a servir como página principal
-En "Commit changes" escribí algo como add wheel of privilege tool
-Click en "Commit changes"
-3. Activar GitHub Pages
-
-Andá a "Settings" (tab superior del repo)
-En el menú izquierdo, click en "Pages"
-En "Source" seleccioná "Deploy from a branch"
-En "Branch" seleccioná main y la carpeta / (root)
-Click en "Save"
-4. Esperar el deploy
-
-Tarda entre 1 y 3 minutos
-Recargá la página de Settings → Pages hasta que aparezca el banner verde con tu URL
-La URL va a ser: https://tu-usuario.github.io/wheel-of-privilege/
-Una vez que tengas la URL, volvé y te genero la diapositiva de transición con el QR code listo para insertar en tu presentación de Google Slides.
-
-Y cómo puedo hacer para ver los cambios automáticamente desde mi pantalla? Si alguien entra a la page de github y empieza a llenar sus datos, podemos verlo cambiar en tiempo real en la presentación?
-
-10:00 AM
-Lo que describís requiere sincronización en tiempo real entre dispositivos — y eso no es posible solo con un archivo HTML estático en GitHub Pages. El archivo no tiene servidor ni base de datos, cada persona que lo abre tiene su propia instancia independiente en su navegador.
-
-Para lograr lo que querés necesitás una capa de sincronización en tiempo real. Hay dos caminos realistas:
-
-Opción A — Firebase Realtime Database (gratuito, yo te armo el código) Google Firebase tiene un plan gratuito que permite sincronización en tiempo real entre navegadores. La idea sería: cada participante llena su perfil → los datos se guardan en Firebase → tu pantalla los lee y actualiza el radar automáticamente. Requiere crear un proyecto en Firebase (5 minutos) y yo modifico el HTML para conectarlo.
-
-Opción B — Separar la herramienta en dos páginas Una URL para participantes (/fill) donde cada quien llena su perfil, y otra URL para vos (/dashboard) que muestra todos los radares en tiempo real. También requiere Firebase o algo similar.
-
-Antes de seguir por ese camino, tengo una pregunta práctica:
-
-P: ¿Cómo imaginás el momento en el taller?
-R: Cada persona llena su perfil y yo veo todos los radares aparecer en pantalla grande
-
-10:00 AM
-Perfecto, eso es lo más poderoso pero requiere Firebase. Te explico el plan completo y luego te armo el código.
-
-La arquitectura va a ser:
-
-URL / → cada participante llena su perfil (la herramienta que ya tenemos)
-URL /dashboard → tu pantalla grande, muestra todos los radares apareciendo en tiempo real
-Primero configurá Firebase (5 minutos):
-
-Andá a console.firebase.google.com
-Click en "Create a project" → nombre: wheel-of-privilege → continuar sin Google Analytics
-En el menú izquierdo, click en Realtime Database → "Create database"
-Elegí la región más cercana (us-central1 está bien)
-Seleccioná "Start in test mode" (permite leer y escribir sin autenticación por 30 días — suficiente para un taller)
-Click en "Enable"
-Copiá la URL de tu base de datos, tiene esta forma: https://wheel-of-privilege-xxxxx-default-rtdb.firebaseio.com
-Luego andá a Project Settings (ícono de engranaje) → pestaña "General" → scroll abajo hasta "Your apps" → click en </> (Web) → registrá la app → copiá el objeto firebaseConfig que te da.
-
-Cuando tengas eso, volvé y pegalo acá. Con esa config te genero los dos archivos (index.html y dashboard.html) listos para subir al repo de GitHub.
-
-Antes que nada, no está funcionando el github page
-
-10:01 AM
-Revisemos. ¿Qué ves exactamente?
-
-P: ¿Qué ves cuando entrás a la URL?
-R: [No preference]
-
-10:02 AM
-Contame qué ves — un screenshot o describir lo que aparece en pantalla me ayuda a diagnosticar. Mientras tanto, las caus
-
-La respuesta de Claude fue interrumpida
-Screenshot 2026-03-18 at 10.01.53 AM.png
-10:02 AM
-Está sirviendo el README en vez del index.html. El problema es que el archivo probablemente se subió con el nombre wheel_of_privilege.html en vez de index.html.
-
-Para arreglarlo:
-
-Andá a github.com/seleneyang/wheel-of-privilege
-Verificá cómo se llama el archivo — si dice wheel_of_privilege.html ese es el problema
-Tenés dos opciones:
-Opción A — Renombrar desde GitHub (más fácil):
-
-Click en el archivo
-Click en el ícono del lápiz (Edit)
-En el campo del nombre arriba cambiá wheel_of_privilege.html → index.html
-Click en "Commit changes"
-Opción B — Subir uno nuevo:
-
-Descargá el archivo que generamos, renombralo a index.html en tu computadora
-En GitHub click en "Add file" → "Upload files"
-Subí el index.html
-Borrá el archivo viejo
-Después de cualquiera de las dos, esperá 1-2 minutos y recargá seleneyang.github.io/wheel-of-privilege/ — debería aparecer la herramienta.
-
-Sigamos con el trabajo de firebase
-
-10:04 AM
-Perfecto. ¿Ya tenés el firebaseConfig? Es el objeto que te da Firebase al registrar la app web, tiene esta forma:
-
-javascript
-const firebaseConfig = {
-  apiKey: "AIza...",
-  authDomain: "wheel-of-privilege-xxxxx.firebaseapp.com",
-  databaseURL: "https://wheel-of-privilege-xxxxx-default-rtdb.firebaseio.com",
-  projectId: "wheel-of-privilege-xxxxx",
-  storageBucket: "wheel-of-privilege-xxxxx.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123"
-};
-Pegalo acá y te genero los dos archivos listos para subir al repo:
-
-index.html — la herramienta para participantes
-dashboard.html — tu pantalla grande con todos los radares en tiempo real
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyA--LXRXPEEbXO1RkrndfnGkeE0YPxUGYs",
-  authDomain: "wheel-of-privilege.firebaseapp.com",
-  databaseURL: "https://wheel-of-privilege-default-rtdb.firebaseio.com",
-  projectId: "wheel-of-privilege",
-  storageBucket: "wheel-of-privilege.firebasestorage.app",
-  messagingSenderId: "656587220251",
-  appId: "1:656587220251:web:bcda7be942594e41cb1fbe"
-};
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-Mostrar más
-10:10 AM
-Perfecto, tengo todo lo que necesito. Te genero los dos archivos ahora.
-
-
-Se crearon 2 archivos, ejecutó un comando, archivo leído
-Se crearon 2 archivos, ejecutó un comando, archivo leído
-Listos. Subí los dos archivos al repo de GitHub reemplazando el index.html que ya tenías y agregando el dashboard.html.
-
-Cómo funciona:
-
-seleneyang.github.io/wheel-of-privilege/ → lo que ven los participantes en sus dispositivos
-seleneyang.github.io/wheel-of-privilege/dashboard.html → tu pantalla grande durante el taller
-El dashboard tiene tres modos de vista:
-
-Grid — una tarjeta por participante con su radar individual, aparecen en tiempo real a medida que la gente se conecta
-Overlay — todos los perfiles superpuestos en un solo radar para comparar
-Aggregate — barras horizontales por dimensión mostrando la distribución del grupo (cuántos eligieron cada anillo)
-El botón "Clear all" borra todos los datos de Firebase al terminar el taller.
-
-Una advertencia: el databaseURL de Firebase está en el código visible — cualquiera que inspeccione el HTML puede ver la configuración. Para un taller eso está bien porque activaste test mode, pero después del taller podés ir a Firebase Console → Realtime Database → Rules y cambiar las reglas para cerrar el acceso.
-
-Index
-Código · HTML 
-Dashboard
-Código · HTML 
-Podrías hacerme un readme?
-
-10:16 AM
-
-Reading docx skill
-Reading docx skill
-El README es para el repo de GitHub, así que lo más adecuado es un archivo Markdown. Lo hago directamente.
-
-
-Creó un archivo, archivo leído
-Creó un archivo, archivo leído
-Listo. Cubre todo lo necesario para que otra persona pueda replicar el setup desde cero: qué hace la herramienta, las 12 dimensiones en tabla, cómo configurar Firebase, cómo activar GitHub Pages, cómo correr el taller, y la nota de seguridad sobre las credenciales.
-
-Subilo al repo junto con los dos HTML y reemplaza el README que generó GitHub automáticamente.
-
-Readme
-Documento · MD 
-How do i open the dashboard document?
-
-10:19 AM
-The dashboard is just an HTML file — you open it directly in your browser.
-
-Since it's already on GitHub Pages, just go to:
-
-https://seleneyang.github.io/wheel-of-privilege/dashboard.html
-That's it. Bookmark that URL and keep it open on the screen you'll project during the workshop — it will update automatically as participants connect.
-
-Hay alguna forma que en el dashboard donde vamos a ver los resultados, haya un resultado que aglomere por ejemplo, cuál es el nivel de privilegio de todo el grupo que está contestando?
-
-10:29 AM
-Sí, eso es exactamente el modo Aggregate que ya está en el dashboard — pero entiendo que quizás no es suficientemente visible o no comunica lo que buscás. Tengo una pregunta antes de modificarlo:
-
-P: ¿Cómo imaginás ese resultado grupal?
-R: Ambos: numero resumen + radar promedio
-
-10:30 AM
-Perfecto. Voy a agregar al dashboard un panel fijo en la parte superior con el score promedio del grupo y un radar que representa la "forma colectiva".
-
-
-Vio 5 archivos, editó 5 archivos, se ejecutaron 2 comandos
-Vio 5 archivos, editó 5 archivos, se ejecutaron 2 comandos
-Listo. El dashboard ahora tiene un panel fijo debajo de la barra de controles que muestra tres cosas a la vez, en tiempo real:
-
-Score grupal (0–100) — promedio de proximidad al centro en todas las respuestas del grupo. El número y el color cambian automáticamente: dorado si el grupo es mayoritariamente privilegiado, verde si es mixto, rojo si es mayoritariamente marginalizadx.
-
-Radar promedio — la "forma colectiva" del grupo, calculada como el promedio por dimensión. Es la representación visual del perfil grupal.
-
-Barras de distribución — qué porcentaje de todas las respuestas cayó en cada anillo (Privileged / Middle / Marginalized), para ver de un vistazo la composición general.
-
-Este panel se actualiza en vivo cada vez que alguien responde una dimensión nueva, sin necesidad de recargar.
-
-Dashboard
-Código · HTML 
-
-
-
-
-
-Claude es IA y puede cometer errores. Por favor, verifica nuevamente las respuestas.
-Dashboard · HTML
-Copiar
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -388,34 +14,34 @@ Copiar
   --center: #c9a84c; --middle: #7a9e8a; --outer: #c05a5a; --r: 8px;
 }
 body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; display: flex; flex-direction: column; }
- 
+
 header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; }
 header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; letter-spacing: -0.02em; }
 header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
- 
+
 .top-bar { padding: 0.7rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; flex-wrap: wrap; }
 .top-left { display: flex; align-items: center; gap: 1rem; }
 .status-wrap { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--muted); }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
 .status-dot.live { background: var(--middle); box-shadow: 0 0 0 3px rgba(122,158,138,0.2); animation: livepulse 2s infinite; }
 @keyframes livepulse { 0%,100%{box-shadow:0 0 0 3px rgba(122,158,138,0.2)} 50%{box-shadow:0 0 0 6px rgba(122,158,138,0.05)} }
- 
+
 .participant-count { font-size: 0.72rem; color: var(--muted); }
 .participant-count strong { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--text); font-weight: 400; vertical-align: middle; margin-right: 3px; }
- 
+
 .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
 .vt-btn { background: none; border: none; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; padding: 0.35rem 0.7rem; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
 .vt-btn:hover { color: var(--text); }
 .vt-btn.active { background: rgba(255,255,255,0.07); color: var(--text); }
- 
+
 .clear-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; padding: 0.35rem 0.8rem; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
 .clear-btn:hover { border-color: var(--outer); color: var(--outer); }
- 
+
 /* empty state */
 .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem; padding: 3rem; }
 .empty-state .big { font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--muted); opacity: 0.3; }
 .empty-state p { font-size: 0.8rem; color: var(--muted); text-align: center; max-width: 300px; line-height: 1.7; }
- 
+
 /* grid view */
 .grid-view { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; align-content: start; }
 .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; animation: fadein 0.3s ease; }
@@ -428,14 +54,14 @@ header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-
 .cs-n { display:block; font-family:'DM Serif Display',serif; font-size:0.95rem; }
 .cs-l { font-size:0.55rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); }
 .cs0 .cs-n { color:var(--center); } .cs1 .cs-n { color:var(--middle); } .cs2 .cs-n { color:var(--outer); }
- 
+
 /* overlay view */
 .overlay-view { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem 2rem; overflow: hidden; }
 .overlay-box { width: 100%; max-width: 560px; }
 .overlay-legend { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; margin-top: 1rem; }
 .ol-item { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: var(--muted); }
 .ol-swatch { width: 20px; height: 3px; border-radius: 2px; }
- 
+
 /* group summary panel */
 .group-panel { padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 2rem; flex-shrink: 0; flex-wrap: wrap; }
 .group-score-wrap { display: flex; align-items: center; gap: 1rem; }
@@ -452,7 +78,7 @@ header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-
 .gb-bar-wrap { flex: 1; height: 6px; background: var(--border2); border-radius: 3px; overflow: hidden; }
 .gb-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
 .gb-pct { font-size: 0.65rem; color: var(--muted); width: 32px; text-align: right; flex-shrink: 0; }
- 
+
 /* aggregate view */
 .agg-view { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; }
 .agg-title { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
@@ -465,7 +91,7 @@ header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-
 </style>
 </head>
 <body>
- 
+
 <header>
   <div>
     <h1>Facilitator Dashboard</h1>
@@ -479,7 +105,7 @@ header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-
     </div>
   </div>
 </header>
- 
+
 <div class="top-bar">
   <div class="top-left">
     <div class="status-wrap">
@@ -497,7 +123,7 @@ header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-
     <button class="clear-btn" onclick="clearAll()">Clear all</button>
   </div>
 </div>
- 
+
 <div class="group-panel" id="groupPanel">
   <div class="group-score-wrap">
     <div>
@@ -531,14 +157,14 @@ header p { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-
     <div style="font-size:0.62rem;color:var(--muted);margin-top:0.2rem" id="gbNote">Score = avg proximity to center across all answers (0–100)</div>
   </div>
 </div>
- 
+
 <div id="mainContent" style="display:contents"></div>
- 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
- 
+
 const firebaseConfig = {
   apiKey: "AIzaSyA--LXRXPEEbXO1RkrndfnGkeE0YPxUGYs",
   authDomain: "wheel-of-privilege.firebaseapp.com",
@@ -548,10 +174,10 @@ const firebaseConfig = {
   messagingSenderId: "656587220251",
   appId: "1:656587220251:web:bcda7be942594e41cb1fbe"
 };
- 
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
- 
+
 const DIMS = [
   { key:'gender',   label:'Gender',           opts:['Cisgender man','Cisgender woman','Trans / nonbinary'] },
   { key:'citizen',  label:'Citizenship',      opts:['Citizen','Documented','Undocumented'] },
@@ -566,7 +192,7 @@ const DIMS = [
   { key:'wealth',   label:'Wealth',           opts:['Comfortable','Struggling','Poverty'] },
   { key:'language', label:'Language',         opts:['Majority language','Learned language','Monolingual minority'] },
 ];
- 
+
 const PALETTE = [
   { border:'rgba(201,168,76,0.85)',  bg:'rgba(201,168,76,0.10)',  hex:'#c9a84c' },
   { border:'rgba(122,158,138,0.85)', bg:'rgba(122,158,138,0.10)', hex:'#7a9e8a' },
@@ -577,20 +203,20 @@ const PALETTE = [
   { border:'rgba(80,160,200,0.85)',  bg:'rgba(80,160,200,0.10)',  hex:'#50a0c8' },
   { border:'rgba(170,160,80,0.85)',  bg:'rgba(170,160,80,0.10)',  hex:'#aaa050' },
 ];
- 
+
 const RING_COLORS = ['#c9a84c','#7a9e8a','#c05a5a'];
 const RING_LABELS = ['Privileged','Middle','Marginalized'];
- 
+
 let profiles = {}; // { sessionId: { answers:{}, updatedAt } }
 let currentView = 'grid';
 let overlayChart = null;
 let cardCharts = {};
 let groupRadarChart = null;
- 
+
 const profilesRef = ref(db, 'profiles');
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
- 
+
 function initGroupRadar() {
   const ctx = document.getElementById('groupRadar').getContext('2d');
   groupRadarChart = new Chart(ctx, {
@@ -615,7 +241,7 @@ function initGroupRadar() {
     }
   });
 }
- 
+
 function updateGroupSummary(ids) {
   if (ids.length === 0) {
     document.getElementById('groupScoreNum').textContent = '—';
@@ -626,9 +252,9 @@ function updateGroupSummary(ids) {
     [0,1,2].forEach(i => { document.getElementById(`gbBar${i}`).style.width='0%'; document.getElementById(`gbPct${i}`).textContent='0%'; });
     return;
   }
- 
+
   let totalAnswers = 0, totalScore = 0, ringTotals = [0,0,0];
- 
+
   const avgData = DIMS.map(dim => {
     let sum = 0, count = 0;
     ids.forEach(id => {
@@ -642,27 +268,27 @@ function updateGroupSummary(ids) {
     });
     return count > 0 ? sum / count : null;
   });
- 
+
   const rawScore = totalAnswers > 0 ? (totalScore / totalAnswers - 1) / 2 : null;
   const score = rawScore !== null ? Math.round(rawScore * 100) : null;
- 
+
   const scoreColor = score === null ? '#6b6860' : score >= 60 ? '#c9a84c' : score >= 35 ? '#7a9e8a' : '#c05a5a';
   const bgColor    = score === null ? 'rgba(107,104,96,0.10)' : score >= 60 ? 'rgba(201,168,76,0.10)' : score >= 35 ? 'rgba(122,158,138,0.10)' : 'rgba(192,90,90,0.10)';
   const scoreLabel = score === null ? 'No data yet' : score >= 60 ? 'Mostly privileged group' : score >= 35 ? 'Mixed group' : 'Mostly marginalized group';
- 
+
   document.getElementById('groupScoreNum').textContent = score !== null ? score : '—';
   document.getElementById('groupScoreNum').style.color = scoreColor;
   document.getElementById('groupScoreSub').textContent = scoreLabel;
   document.getElementById('groupScoreBar').style.width = (score||0) + '%';
   document.getElementById('groupScoreBar').style.background = scoreColor;
- 
+
   const ringTotal = ringTotals[0] + ringTotals[1] + ringTotals[2];
   [0,1,2].forEach(i => {
     const pct = ringTotal > 0 ? Math.round((ringTotals[i]/ringTotal)*100) : 0;
     document.getElementById(`gbBar${i}`).style.width = pct + '%';
     document.getElementById(`gbPct${i}`).textContent = pct + '%';
   });
- 
+
   if (groupRadarChart) {
     groupRadarChart.data.datasets[0].data = avgData;
     groupRadarChart.data.datasets[0].borderColor = scoreColor;
@@ -670,7 +296,7 @@ function updateGroupSummary(ids) {
     groupRadarChart.update('none');
   }
 }
- 
+
 onValue(profilesRef, (snap) => {
   statusDot.className = 'status-dot live';
   statusText.textContent = 'Live';
@@ -681,45 +307,45 @@ onValue(profilesRef, (snap) => {
   updateGroupSummary(ids);
   renderCurrentView();
 });
- 
+
 window.setView = function(view, btn) {
   currentView = view;
   document.querySelectorAll('.vt-btn').forEach(b => b.classList.toggle('active', b === btn));
   renderCurrentView();
 };
- 
+
 window.clearAll = function() {
   if (confirm('Clear all participant data?')) {
     remove(ref(db, 'profiles'));
   }
 };
- 
+
 function renderCurrentView() {
   // destroy old charts
   Object.values(cardCharts).forEach(c => c.destroy());
   cardCharts = {};
   if (overlayChart) { overlayChart.destroy(); overlayChart = null; }
- 
+
   const content = document.getElementById('mainContent');
   content.innerHTML = '';
- 
+
   const ids = Object.keys(profiles);
   if (ids.length === 0) {
     content.innerHTML = `<div class="empty-state"><div class="big">0</div><p>Waiting for participants to connect and fill their profiles. Share the page URL with them to get started.</p></div>`;
     return;
   }
- 
+
   if (currentView === 'grid') renderGrid(content, ids);
   else if (currentView === 'overlay') renderOverlay(content, ids);
   else renderAggregate(content, ids);
 }
- 
+
 function statsFor(answers) {
   let c = [0,0,0];
   DIMS.forEach(d => { if (answers[d.key]!==undefined) c[answers[d.key]]++; });
   return c;
 }
- 
+
 function radarDataFor(answers, palIdx) {
   const data = DIMS.map(d => answers[d.key]!==undefined ? 3 - answers[d.key] : null);
   const ptColors = DIMS.map(d => answers[d.key]!==undefined ? RING_COLORS[answers[d.key]] : 'rgba(255,255,255,0.1)');
@@ -737,7 +363,7 @@ function radarDataFor(answers, palIdx) {
     }]
   };
 }
- 
+
 const baseOpts = {
   responsive: true, maintainAspectRatio: true, animation: { duration: 300 },
   scales: { r: { min:0,max:3,ticks:{display:false},grid:{color:'rgba(255,255,255,0.07)'},angleLines:{color:'rgba(255,255,255,0.07)'},pointLabels:{color:'#6b6860',font:{family:'DM Sans',size:9,weight:'300'},padding:4} } },
@@ -748,18 +374,18 @@ const baseOpts = {
     titleFont:{family:'DM Sans',size:11},bodyFont:{family:'DM Sans',size:11},
   }}
 };
- 
+
 function renderGrid(content, ids) {
   const grid = document.createElement('div');
   grid.className = 'grid-view';
- 
+
   ids.forEach((id, i) => {
     const prof = profiles[id];
     const answers = prof.answers || {};
     const answered = Object.keys(answers).length;
     const stats = statsFor(answers);
     const pi = i % PALETTE.length;
- 
+
     const card = document.createElement('div');
     card.className = 'profile-card';
     card.innerHTML = `
@@ -767,10 +393,10 @@ function renderGrid(content, ids) {
         <span class="card-num" style="color:${PALETTE[pi].hex}">Profile ${i+1}</span>
         <span class="card-progress">${answered}/${DIMS.length} answered</span>
       </div>`;
- 
+
     const canvas = document.createElement('canvas');
     card.appendChild(canvas);
- 
+
     const statsEl = document.createElement('div');
     statsEl.className = 'card-stats';
     RING_LABELS.forEach((l,ri) => {
@@ -778,26 +404,26 @@ function renderGrid(content, ids) {
     });
     card.appendChild(statsEl);
     grid.appendChild(card);
- 
+
     setTimeout(() => {
       cardCharts[id] = new Chart(canvas, {
         type:'radar', data: radarDataFor(answers, pi), options: baseOpts
       });
     }, 0);
   });
- 
+
   content.appendChild(grid);
 }
- 
+
 function renderOverlay(content, ids) {
   const wrap = document.createElement('div');
   wrap.className = 'overlay-view';
- 
+
   const box = document.createElement('div');
   box.className = 'overlay-box';
   const canvas = document.createElement('canvas');
   box.appendChild(canvas);
- 
+
   const leg = document.createElement('div');
   leg.className = 'overlay-legend';
   ids.forEach((id, i) => {
@@ -805,11 +431,11 @@ function renderOverlay(content, ids) {
     const answered = Object.keys((profiles[id].answers||{})).length;
     leg.innerHTML += `<div class="ol-item"><span class="ol-swatch" style="background:${PALETTE[pi].hex}"></span>Profile ${i+1} (${answered}/${DIMS.length})</div>`;
   });
- 
+
   wrap.appendChild(box);
   wrap.appendChild(leg);
   content.appendChild(wrap);
- 
+
   const datasets = ids.map((id, i) => {
     const answers = profiles[id].answers || {};
     const pi = i % PALETTE.length;
@@ -825,7 +451,7 @@ function renderOverlay(content, ids) {
       fill:true,
     };
   });
- 
+
   overlayChart = new Chart(canvas, {
     type:'radar',
     data:{ labels:DIMS.map(d=>d.label), datasets },
@@ -844,19 +470,19 @@ function renderOverlay(content, ids) {
     }
   });
 }
- 
+
 function renderAggregate(content, ids) {
   const wrap = document.createElement('div');
   wrap.className = 'agg-view';
- 
+
   const title = document.createElement('div');
   title.className = 'agg-title';
   title.textContent = `Aggregate distribution across ${ids.length} participant${ids.length!==1?'s':''} — bar width = % of responses per ring`;
   wrap.appendChild(title);
- 
+
   const grid = document.createElement('div');
   grid.className = 'agg-grid';
- 
+
   DIMS.forEach(dim => {
     const counts = [0,0,0];
     let total = 0;
@@ -864,11 +490,11 @@ function renderAggregate(content, ids) {
       const a = profiles[id].answers || {};
       if (a[dim.key]!==undefined) { counts[a[dim.key]]++; total++; }
     });
- 
+
     const row = document.createElement('div');
     row.className = 'agg-row';
     row.innerHTML = `<div class="agg-label">${dim.label}</div>`;
- 
+
     const barColors = ['var(--center)','var(--middle)','var(--outer)'];
     counts.forEach((c, ri) => {
       const pct = total > 0 ? Math.round((c/total)*100) : 0;
@@ -877,10 +503,10 @@ function renderAggregate(content, ids) {
       bwrap.innerHTML = `<div class="agg-bar" style="width:${pct}%;background:${barColors[ri]};opacity:0.7">${pct>8?`<span>${pct}%</span>`:''}</div>`;
       row.appendChild(bwrap);
     });
- 
+
     grid.appendChild(row);
   });
- 
+
   // column headers
   const headerRow = document.createElement('div');
   headerRow.className = 'agg-row';
@@ -889,16 +515,15 @@ function renderAggregate(content, ids) {
   ['Privileged','Middle','Marginalized'].forEach((l,i) => {
     headerRow.innerHTML += `<div style="font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:${['var(--center)','var(--middle)','var(--outer)'][i]}">${l}</div>`;
   });
- 
+
   wrap.appendChild(headerRow);
   wrap.appendChild(grid);
   content.appendChild(wrap);
 }
- 
+
 // init
 initGroupRadar();
 renderCurrentView();
 </script>
 </body>
 </html>
- 
